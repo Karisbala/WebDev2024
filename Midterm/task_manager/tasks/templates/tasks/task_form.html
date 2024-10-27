@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if task %}Update Task{% else %}Create Task{% endif %}</title>
+</head>
+<body>
+    <h1>{% if task %}Update Task{% else %}Create Task{% endif %}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" value="{% if task %}{{ task.title }}{% endif %}" required><br>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description">{% if task %}{{ task.description }}{% endif %}</textarea><br>
+        {% if task %}
+        <label for="completed">Completed:</label>
+        <input type="checkbox" id="completed" name="completed" {% if task.completed %}checked{% endif %}><br>
+        {% endif %}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'task_list' %}">Back to Task List</a>
+</body>
+</html>
