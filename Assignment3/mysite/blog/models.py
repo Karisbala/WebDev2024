@@ -6,6 +6,13 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+class PostManager(models.Manager):
+    def published(self):
+        return self.filter(published_date__lte=timezone.now())
+
+    def by_author(self, author_name):
+        return self.filter(author=author_name)
 
 class Post(models.Model):
     title = models.CharField(max_length=200)
@@ -13,6 +20,8 @@ class Post(models.Model):
     author = models.CharField(max_length=100)
     published_date = models.DateTimeField(default=timezone.now)
     categories = models.ManyToManyField(Category, related_name='posts')
+
+    objects = PostManager()
 
     def __str__(self):
         return self.title
