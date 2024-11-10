@@ -1,10 +1,16 @@
-from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView, DetailView
 from .models import Post
 
-def post_list(request):
-    posts = Post.objects.published().order_by('-published_date')
-    return render(request, 'blog/post_list.html', {'posts': posts})
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'
+    context_object_name = 'posts'
+    ordering = ['-published_date']
 
-def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    return render(request, 'blog/post_detail.html', {'post': post})
+    def get_queryset(self):
+        return Post.objects.published()
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blog/post_detail.html'
+    context_object_name = 'post'
