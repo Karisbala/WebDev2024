@@ -20,6 +20,7 @@ class Post(models.Model):
     author = models.CharField(max_length=100)
     published_date = models.DateTimeField(default=timezone.now)
     categories = models.ManyToManyField(Category, related_name='posts')
+    image = models.ImageField(upload_to='post_images/', blank=True, null=True)
 
     objects = PostManager()
 

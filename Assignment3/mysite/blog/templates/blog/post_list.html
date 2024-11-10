@@ -8,6 +8,9 @@
             <h2><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h2>
             <p>By {{ post.author }}</p>
             <p>Published on: {{ post.published_date|date:"F j, Y" }}</p>
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="{{ post.title }}" style="max-width: 300px;">
+            {% endif %}
         </li>
     {% endfor %}
 </ul>
