@@ -1,0 +1,152 @@
+body {
+    font-family: sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+  }
+  
+a {
+    color: #2196f3;
+    text-decoration: none;
+}
+  
+a:hover {
+    text-decoration: underline;
+}
+  
+.navbar {
+    background: #333;
+    padding: 10px;
+}
+  
+.navbar a {
+    color: #fff;
+    margin-right: 15px;
+    font-weight: bold;
+}
+  
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+  
+h2, h3, h4 {
+    color: #333;
+    margin-top: 0;
+}
+  
+button, .complete-btn, .add-question-btn {
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+  
+button:hover, .complete-btn:hover, .add-question-btn:hover {
+    background: #45a049;
+}
+  
+.message {
+    font-weight: bold;
+    margin-top: 10px;
+    color: #333;
+}
+  
+.lesson-list, .questions-list, .option-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+  
+.lesson-item, .question-item {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+  
+.lesson-item:hover, .question-item:hover {
+    background: #f0f8ff;
+}
+  
+.done-icon {
+    color: #2e7d32;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 5px;
+}
+  
+.video-link {
+    color: #3b5998;
+    font-weight: bold;
+}
+  
+.video-link:hover {
+    text-decoration: underline;
+}
+  
+.correct-option {
+    background: #d4edda;
+    border-radius: 4px;
+    padding: 2px 5px;
+    display: inline-block;
+}
+  
+.question-form label {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+}
+  
+.question-form textarea, .question-form input, .question-form select {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 3px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+  
+.options-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+  
+.option-input {
+    width: calc(50% - 10px);
+}
+  
+.quiz-info, .course-info {
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+  
+.complete-btn {
+    background: #4caf50;
+}
+  
+.complete-btn:hover {
+    background: #45a049;
+}
+  
+.header-link {
+    color: #fff;
+    font-weight: bold;
+}
+  
+.header-link:hover {
+    text-decoration: underline;
+}  

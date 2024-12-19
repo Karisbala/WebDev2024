@@ -4,10 +4,8 @@ from django.shortcuts import get_object_or_404
 from .models import Quiz, QuizQuestion
 from .serializers import QuizSerializer, QuizQuestionSerializer, QuizAttemptSerializer
 from courses.models import Course
-from enrollments.models import Enrollment
+from enrollments.models import Enrollment, UserProgress
 from rest_framework.views import APIView
-from rest_framework import status
-from enrollments.models import UserProgress
 
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.all()
@@ -37,19 +35,6 @@ class QuizViewSet(viewsets.ModelViewSet):
         
         serializer.save(course=course)
 
-    def update(self, request, *args, **kwargs):
-        quiz = self.get_object()
-        if quiz.course.instructor != request.user:
-            return Response({"detail": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        quiz = self.get_object()
-        if quiz.course.instructor != request.user:
-            return Response({"detail": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
-
-
 class QuizQuestionViewSet(viewsets.ModelViewSet):
     queryset = QuizQuestion.objects.all()
     serializer_class = QuizQuestionSerializer
@@ -78,18 +63,6 @@ class QuizQuestionViewSet(viewsets.ModelViewSet):
 
         serializer.save(quiz=quiz)
 
-    def update(self, request, *args, **kwargs):
-        question = self.get_object()
-        if question.quiz.course.instructor != request.user:
-            return Response({"detail": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        question = self.get_object()
-        if question.quiz.course.instructor != request.user:
-            return Response({"detail": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
-    
 class QuizAttemptView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -101,11 +74,9 @@ class QuizAttemptView(APIView):
             user = request.user
 
             quiz = get_object_or_404(Quiz, id=quiz_id)
-
             enrolled = Enrollment.objects.filter(user=user, course=quiz.course).exists()
             if not enrolled:
-                return Response({"detail": "You must be enrolled in this course to attempt the quiz."}, 
-                                status=status.HTTP_403_FORBIDDEN)
+                return Response({"detail": "You must be enrolled in this course to attempt the quiz."}, status=status.HTTP_403_FORBIDDEN)
 
             questions = quiz.questions.all()
             correct_count = 0
@@ -115,10 +86,7 @@ class QuizAttemptView(APIView):
                     correct_count += 1
 
             total_questions = questions.count()
-            if total_questions > 0:
-                score = int((correct_count / total_questions) * quiz.total_marks)
-            else:
-                score = 0
+            score = int((correct_count / total_questions) * quiz.total_marks) if total_questions > 0 else 0
 
             progress, created = UserProgress.objects.get_or_create(user=user, course=quiz.course)
             quiz_scores = progress.quiz_scores

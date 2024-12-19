@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import API from '../services/api';
 
 const ManageCourse = () => {
@@ -7,12 +7,7 @@ const ManageCourse = () => {
   const [courseInfo, setCourseInfo] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
-  const [lessonTitle, setLessonTitle] = useState('');
-  const [lessonContent, setLessonContent] = useState('');
-  const [lessonVideoUrl, setLessonVideoUrl] = useState('');
-  const [quizTitle, setQuizTitle] = useState('');
-  const [quizTotalMarks, setQuizTotalMarks] = useState('');
-  const [message, setMessage] = useState('');
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -47,110 +42,49 @@ const ManageCourse = () => {
     fetchQuizzes();
   }, [course_id]);
 
-  const handleAddLesson = async (e) => {
-    e.preventDefault();
-    try {
-      await API.post('lessons/', {
-        course: Number(course_id),
-        title: lessonTitle,
-        content: lessonContent,
-        video_url: lessonVideoUrl
-      });
-      setMessage('Lesson added!');
-      setLessonTitle('');
-      setLessonContent('');
-      setLessonVideoUrl('');
-      const resp = await API.get(`lessons/?course=${course_id}`);
-      setLessons(resp.data);
-    } catch (err) {
-      console.error('Failed to add lesson', err);
-      setMessage('Failed to add lesson.');
-    }
-  };
-
-  const handleAddQuiz = async (e) => {
-    e.preventDefault();
-    try {
-      await API.post('quizzes/', {
-        course: Number(course_id),
-        title: quizTitle,
-        total_marks: parseInt(quizTotalMarks)
-      });
-      setMessage('Quiz added!');
-      setQuizTitle('');
-      setQuizTotalMarks('');
-      const resp = await API.get(`quizzes/?course=${course_id}`);
-      setQuizzes(resp.data);
-    } catch (err) {
-      console.error('Failed to add quiz', err);
-      setMessage('Failed to add quiz.');
-    }
+  const handleViewLessonDetails = (lesson) => {
+    setSelectedLesson(lesson);
   };
 
   return (
-    <div>
+    <div className="container">
       <h2>Manage Course</h2>
       {courseInfo && (
-        <div>
+        <div className="course-info">
           <h3>{courseInfo.title}</h3>
           <p>{courseInfo.description}</p>
         </div>
       )}
 
-      <h3>Add Lesson</h3>
-      <form onSubmit={handleAddLesson}>
-        <input
-          placeholder="Lesson Title"
-          value={lessonTitle}
-          onChange={(e) => setLessonTitle(e.target.value)}
-        /><br/>
-        <textarea
-          placeholder="Lesson Content"
-          value={lessonContent}
-          onChange={(e) => setLessonContent(e.target.value)}
-        /><br/>
-        <input
-          placeholder="Video URL"
-          value={lessonVideoUrl}
-          onChange={(e) => setLessonVideoUrl(e.target.value)}
-        /><br/>
-        <button type="submit">Add Lesson</button>
-      </form>
-
-      <h4>Existing Lessons</h4>
-      <ul>
+      <h3>Lessons</h3>
+      <ul className="lesson-list">
         {lessons.map(l => (
-          <li key={l.id}>{l.title}</li>
-        ))}
-      </ul>
-
-      <h3>Add Quiz</h3>
-      <form onSubmit={handleAddQuiz}>
-        <input
-          placeholder="Quiz Title"
-          value={quizTitle}
-          onChange={(e) => setQuizTitle(e.target.value)}
-        /><br/>
-        <input
-          placeholder="Total Marks"
-          type="number"
-          value={quizTotalMarks}
-          onChange={(e) => setQuizTotalMarks(e.target.value)}
-        /><br/>
-        <button type="submit">Add Quiz</button>
-      </form>
-
-      <h4>Existing Quizzes</h4>
-      <ul>
-        {quizzes.map(q => (
-          <li key={q.id}>
-            {q.title} - {q.total_marks} marks
-            {/* For each quiz, we could link to a "ManageQuiz" page to add questions */}
+          <li key={l.id} className="lesson-item">
+            <strong>{l.title}</strong> 
+            <button style={{ marginLeft:'10px' }} onClick={() => handleViewLessonDetails(l)}>View Details</button>
           </li>
         ))}
       </ul>
 
-      {message && <p>{message}</p>}
+      {selectedLesson && (
+        <div className="course-info" style={{ marginTop:'10px' }}>
+          <h4>Lesson Details</h4>
+          <p><strong>Title:</strong> {selectedLesson.title}</p>
+          <p><strong>Content:</strong> {selectedLesson.content}</p>
+          {selectedLesson.video_url && <p><a href={selectedLesson.video_url} target="_blank" rel="noopener noreferrer">Watch Video</a></p>}
+          <button onClick={() => setSelectedLesson(null)} style={{ marginTop:'5px' }}>Close Details</button>
+        </div>
+      )}
+
+      <h3>Quizzes</h3>
+      <ul className="lesson-list">
+        {quizzes.map(q => (
+          <li key={q.id} className="lesson-item">
+            {q.title} - {q.total_marks} marks
+            <Link to={`/instructor/manage-quiz/${q.id}`} style={{ marginLeft:'10px' }}>Manage Quiz</Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

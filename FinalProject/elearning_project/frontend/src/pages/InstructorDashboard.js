@@ -56,7 +56,6 @@ const InstructorDashboard = ({ userInfo }) => {
 
       const response = await API.get(`courses/?instructor=${userInfo.id}`);
       setMyCreatedCourses(response.data);
-
     } catch (err) {
       console.error('Failed to create course', err);
       setMessage('Failed to create course.');
@@ -64,24 +63,20 @@ const InstructorDashboard = ({ userInfo }) => {
   };
 
   return (
-    <div>
+    <div className="container">
       <h2>Instructor Dashboard</h2>
       <h3>Create a New Course</h3>
       <form onSubmit={handleCreateCourse}>
-        <label>
-          Title:<br/>
+        <label>Title:<br/>
           <input value={title} onChange={(e) => setTitle(e.target.value)} />
         </label><br/>
-        <label>
-          Description:<br/>
+        <label>Description:<br/>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
         </label><br/>
-        <label>
-          Price:<br/>
+        <label>Price:<br/>
           <input type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
         </label><br/>
-        <label>
-          Category:<br/>
+        <label>Category:<br/>
           <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
             <option value="">Select Category</option>
             {categories.map(cat => (
@@ -91,14 +86,13 @@ const InstructorDashboard = ({ userInfo }) => {
         </label><br/>
         <button type="submit">Create Course</button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p className="message">{message}</p>}
 
       <h3>My Created Courses</h3>
-      <ul>
+      <ul className="lesson-list">
         {myCreatedCourses.map(course => (
-          <li key={course.id}>
+          <li key={course.id} className="lesson-item">
             {course.title} - ${course.price} 
-            {/* Link to a "ManageCourse" page where instructor can add lessons, quizzes */}
             <Link to={`/instructor/manage-course/${course.id}`} style={{ marginLeft:'10px' }}>Manage</Link>
           </li>
         ))}

@@ -153,18 +153,28 @@ const CourseDetail = () => {
       )}
 
       <h3>Lessons</h3>
-      {lessons.map((lesson) => (
-        <li key={lesson.id}>
-          <strong>{lesson.title}</strong><br/>
-          {lesson.content}<br/>
-          {lesson.video_url && <a href={lesson.video_url} target="_blank" rel="noopener noreferrer">Watch Video</a>}
-          {isEnrolled && (
-            <button onClick={() => markLessonComplete(lesson.id)}>
-              Mark as Completed
-            </button>
-          )}
-        </li>
-      ))}
+      <ul className="lesson-list">
+        {lessons.map((lesson) => {
+          const completed = userProgress && userProgress.completed_lessons.includes(lesson.id);
+          return (
+            <li key={lesson.id} className="lesson-item">
+              <strong>{lesson.title}</strong><br/>
+              {lesson.content}<br/>
+              {lesson.video_url && <a href={lesson.video_url} target="_blank" rel="noopener noreferrer" className="video-link">Watch Video</a>}
+              
+              {isEnrolled && (
+                completed ? (
+                  <span className="done-icon">✓ Completed</span>
+                ) : (
+                  <button className="complete-btn" onClick={() => markLessonComplete(lesson.id)}>
+                    Mark as Completed
+                  </button>
+                )
+              )}
+            </li>
+          );
+        })}
+      </ul>
 
       <h3>Quizzes</h3>
       {quizzes.length === 0 ? (

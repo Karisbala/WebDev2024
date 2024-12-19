@@ -30,8 +30,8 @@ const QuizAttempt = () => {
     e.preventDefault();
     try {
       const response = await API.post('quizzes/attempt/', {
-        quiz_id: parseInt(quiz_id),
-        answers
+        quiz_id: quiz_id,
+        answers: answers
       });
       setScore(response.data.score);
     } catch (err) {

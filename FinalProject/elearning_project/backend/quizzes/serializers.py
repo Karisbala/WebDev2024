@@ -18,7 +18,7 @@ class QuizSerializer(serializers.ModelSerializer):
 class QuizAttemptSerializer(serializers.Serializer):
     quiz_id = serializers.IntegerField()
     answers = serializers.DictField(
-        child=serializers.CharField(max_length=1)
+        child=serializers.CharField()
     )
 
     def validate_quiz_id(self, value):

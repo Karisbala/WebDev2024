@@ -9,6 +9,8 @@ import CourseDetail from './pages/CourseDetail';
 import QuizAttempt from './pages/QuizzAttempt';
 import InstructorDashboard from './pages/InstructorDashboard';
 import ManageCourse from './pages/ManageCourse';
+import ManageQuiz from './pages/ManageQuiz';
+import './styles.css';
 
 const App = () => {
   const isAuthenticated = !!localStorage.getItem('access_token');
@@ -69,6 +71,7 @@ const App = () => {
             <>
               <Route path="/instructor" element={<InstructorDashboard userInfo={userInfo} />} />
               <Route path="/instructor/manage-course/:course_id" element={<ManageCourse />} />
+              <Route path="/instructor/manage-quiz/:quiz_id" element={<ManageQuiz />} />
             </>
           )}
         </Routes>
