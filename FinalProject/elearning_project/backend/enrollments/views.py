@@ -6,6 +6,7 @@ from courses.models import Course
 from accounts.models import User
 from .models import Enrollment
 from .serializers import CoursePurchaseSerializer
+from courses.serializers import CourseSerializer
 
 class CoursePurchaseView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -44,3 +45,12 @@ class CoursePurchaseView(APIView):
             }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserEnrollmentsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        enrollments = Enrollment.objects.filter(user=request.user, status='enrolled').select_related('course')
+        courses = [e.course for e in enrollments]
+        serializer = CourseSerializer(courses, many=True)
+        return Response(serializer.data)
