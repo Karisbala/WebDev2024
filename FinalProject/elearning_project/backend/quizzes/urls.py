@@ -6,6 +6,6 @@ router = DefaultRouter()
 router.register(r'quizzes', QuizViewSet, basename='quiz')
 router.register(r'quiz-questions', QuizQuestionViewSet, basename='quiz-question')
 
-urlpatterns = router.urls + [
+urlpatterns = [
     path('quizzes/attempt/', QuizAttemptView.as_view(), name='quiz_attempt'),
-]
+] + router.urls

@@ -9,6 +9,11 @@ const ManageCourse = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [selectedLesson, setSelectedLesson] = useState(null);
 
+  const [newLessonTitle, setNewLessonTitle] = useState('');
+  const [newLessonContent, setNewLessonContent] = useState('');
+  const [newLessonVideoURL, setNewLessonVideoURL] = useState('');
+  const [lessonMessage, setLessonMessage] = useState('');
+
   useEffect(() => {
     const fetchCourse = async () => {
       try {
@@ -46,6 +51,37 @@ const ManageCourse = () => {
     setSelectedLesson(lesson);
   };
 
+  const handleAddLesson = async (e) => {
+    e.preventDefault();
+    setLessonMessage('');
+
+    if (!newLessonTitle || !newLessonContent) {
+      setLessonMessage('Title and content are required.');
+      return;
+    }
+
+    try {
+      await API.post('lessons/', {
+        course: Number(course_id),
+        title: newLessonTitle,
+        content: newLessonContent,
+        video_url: newLessonVideoURL
+      });
+
+      setLessonMessage('Lesson added successfully!');
+      setNewLessonTitle('');
+      setNewLessonContent('');
+      setNewLessonVideoURL('');
+
+      const resp = await API.get(`lessons/?course=${course_id}`);
+      setLessons(resp.data);
+
+    } catch (err) {
+      console.error('Failed to add lesson', err);
+      setLessonMessage('Failed to add lesson.');
+    }
+  };
+
   return (
     <div className="container">
       <h2>Manage Course</h2>
@@ -75,6 +111,21 @@ const ManageCourse = () => {
           <button onClick={() => setSelectedLesson(null)} style={{ marginTop:'5px' }}>Close Details</button>
         </div>
       )}
+
+      <h4>Add New Lesson</h4>
+      <form onSubmit={handleAddLesson}>
+        <label>Title:<br/>
+          <input value={newLessonTitle} onChange={(e) => setNewLessonTitle(e.target.value)} />
+        </label><br/>
+        <label>Content:<br/>
+          <textarea value={newLessonContent} onChange={(e) => setNewLessonContent(e.target.value)} />
+        </label><br/>
+        <label>Video URL:<br/>
+          <input value={newLessonVideoURL} onChange={(e) => setNewLessonVideoURL(e.target.value)} />
+        </label><br/>
+        <button type="submit">Add Lesson</button>
+      </form>
+      {lessonMessage && <p>{lessonMessage}</p>}
 
       <h3>Quizzes</h3>
       <ul className="lesson-list">
