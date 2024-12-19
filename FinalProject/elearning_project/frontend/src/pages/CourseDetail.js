@@ -11,6 +11,8 @@ const CourseDetail = () => {
   const [reviews, setReviews] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
 
+  const [isEnrolled, setIsEnrolled] = useState(false);
+
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [reviewMessage, setReviewMessage] = useState('');
@@ -26,65 +28,8 @@ const CourseDetail = () => {
         console.error('Failed to fetch user info', err);
       }
     };
-
-    const fetchCourseInfo = async () => {
-      try {
-        const response = await API.get(`courses/${id}/`);
-        setCourseInfo(response.data);
-      } catch (err) {
-        console.error('Failed to fetch course detail', err);
-      }
-    };
-
-    const fetchLessons = async () => {
-      try {
-        const response = await API.get(`lessons/?course=${id}`);
-        setLessons(response.data);
-      } catch (err) {
-        console.error('Failed to fetch lessons', err);
-      }
-    };
-
-    const fetchQuizzes = async () => {
-      try {
-        const response = await API.get(`quizzes/?course=${id}`);
-        setQuizzes(response.data);
-      } catch (err) {
-        console.error('Failed to fetch quizzes', err);
-      }
-    };
-
-    const fetchReviews = async () => {
-      try {
-        const response = await API.get(`reviews/?course=${id}`);
-        setReviews(response.data);
-      } catch (err) {
-        console.error('Failed to fetch reviews', err);
-      }
-    };
-
-    const fetchProgress = async () => {
-      if (userInfo && isEnrolled) {
-        try {
-          const resp = await API.get(`enrollments/progress/?course=${id}`);
-          setUserProgress(resp.data);
-        } catch (err) {
-          console.error('Failed to fetch user progress', err);
-        }
-      }
-    };
-
-    fetchProgress();
     fetchUserInfo();
-    fetchCourseInfo();
-    fetchLessons();
-    fetchQuizzes();
-    fetchReviews();
-  }, [userInfo, isEnrolled, id]);
-
-  const isInstructor = userInfo && courseInfo && (courseInfo.instructor === userInfo.id);
-
-  const [isEnrolled, setIsEnrolled] = useState(false);
+  }, []);
 
   useEffect(() => {
     const checkEnrollment = async () => {
@@ -99,12 +44,67 @@ const CourseDetail = () => {
         }
       }
     };
-
-    if (userInfo) {
-      checkEnrollment();
-    }
+    checkEnrollment();
   }, [userInfo, id]);
 
+  useEffect(() => {
+    const fetchCourseInfo = async () => {
+      try {
+        const response = await API.get(`courses/${id}/`);
+        setCourseInfo(response.data);
+      } catch (err) {
+        console.error('Failed to fetch course detail', err);
+      }
+    };
+  
+    const fetchLessons = async () => {
+      try {
+        const response = await API.get(`lessons/?course=${id}`);
+        setLessons(response.data);
+      } catch (err) {
+        console.error('Failed to fetch lessons', err);
+      }
+    };
+  
+    const fetchQuizzes = async () => {
+      try {
+        const response = await API.get(`quizzes/?course=${id}`);
+        setQuizzes(response.data);
+      } catch (err) {
+        console.error('Failed to fetch quizzes', err);
+      }
+    };
+  
+    const fetchReviews = async () => {
+      try {
+        const response = await API.get(`reviews/?course=${id}`);
+        setReviews(response.data);
+      } catch (err) {
+        console.error('Failed to fetch reviews', err);
+      }
+    };
+  
+    fetchCourseInfo();
+    fetchLessons();
+    fetchQuizzes();
+    fetchReviews();
+  }, [id]); 
+  
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (userInfo && isEnrolled) {
+        try {
+          const resp = await API.get(`enrollments/progress/?course=${id}`);
+          setUserProgress(resp.data);
+        } catch (err) {
+          console.error('Failed to fetch user progress', err);
+        }
+      }
+    };
+    fetchProgress();
+  }, [userInfo, isEnrolled, id]);
+  
+  const isInstructor = userInfo && courseInfo && (courseInfo.instructor === userInfo.id);
   const canReview = isEnrolled && !isInstructor;
 
   const handleReviewSubmit = async (e) => {
