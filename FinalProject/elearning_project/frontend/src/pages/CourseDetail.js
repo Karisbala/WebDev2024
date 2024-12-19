@@ -8,8 +8,25 @@ const CourseDetail = () => {
   const [courseInfo, setCourseInfo] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [userInfo, setUserInfo] = useState(null);
+
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [reviewMessage, setReviewMessage] = useState('');
+
+  const [userProgress, setUserProgress] = useState(null);
 
   useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await API.get('accounts/user/');
+        setUserInfo(response.data);
+      } catch (err) {
+        console.error('Failed to fetch user info', err);
+      }
+    };
+
     const fetchCourseInfo = async () => {
       try {
         const response = await API.get(`courses/${id}/`);
@@ -37,10 +54,91 @@ const CourseDetail = () => {
       }
     };
 
+    const fetchReviews = async () => {
+      try {
+        const response = await API.get(`reviews/?course=${id}`);
+        setReviews(response.data);
+      } catch (err) {
+        console.error('Failed to fetch reviews', err);
+      }
+    };
+
+    const fetchProgress = async () => {
+      if (userInfo && isEnrolled) {
+        try {
+          const resp = await API.get(`enrollments/progress/?course=${id}`);
+          setUserProgress(resp.data);
+        } catch (err) {
+          console.error('Failed to fetch user progress', err);
+        }
+      }
+    };
+
+    fetchProgress();
+    fetchUserInfo();
     fetchCourseInfo();
     fetchLessons();
     fetchQuizzes();
-  }, [id]);
+    fetchReviews();
+  }, [userInfo, isEnrolled, id]);
+
+  const isInstructor = userInfo && courseInfo && (courseInfo.instructor === userInfo.id);
+
+  const [isEnrolled, setIsEnrolled] = useState(false);
+
+  useEffect(() => {
+    const checkEnrollment = async () => {
+      if (userInfo) {
+        try {
+          const enrollResp = await API.get('enrollments/user-enrollments/');
+          const enrolledCourses = enrollResp.data;
+          const enrolledCourseIds = enrolledCourses.map(c => c.id);
+          setIsEnrolled(enrolledCourseIds.includes(Number(id)));
+        } catch (err) {
+          console.error('Failed to check enrollment', err);
+        }
+      }
+    };
+
+    if (userInfo) {
+      checkEnrollment();
+    }
+  }, [userInfo, id]);
+
+  const canReview = isEnrolled && !isInstructor;
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!canReview) return;
+    try {
+      await API.post('reviews/', {
+        course: Number(id),
+        rating: Number(rating),
+        comment
+      });
+      setReviewMessage('Review posted successfully!');
+      setComment('');
+      setRating(5);
+      const response = await API.get(`reviews/?course=${id}`);
+      setReviews(response.data);
+    } catch (err) {
+      console.error('Failed to post review', err);
+      setReviewMessage('Failed to post review.');
+    }
+  };
+
+  const markLessonComplete = async (lessonId) => {
+    try {
+      await API.post('enrollments/mark-lesson-complete/', {
+        course_id: Number(id),
+        lesson_id: lessonId
+      });
+      const resp = await API.get(`enrollments/progress/?course=${id}`);
+      setUserProgress(resp.data);
+    } catch (err) {
+      console.error('Failed to mark lesson complete', err);
+    }
+  };
 
   return (
     <div>
@@ -55,19 +153,18 @@ const CourseDetail = () => {
       )}
 
       <h3>Lessons</h3>
-      {lessons.length === 0 ? (
-        <p>No lessons available.</p>
-      ) : (
-        <ul>
-          {lessons.map((lesson) => (
-            <li key={lesson.id}>
-              <strong>{lesson.title}</strong><br/>
-              {lesson.content}<br/>
-              {lesson.video_url && <a href={lesson.video_url} target="_blank" rel="noopener noreferrer">Watch Video</a>}
-            </li>
-          ))}
-        </ul>
-      )}
+      {lessons.map((lesson) => (
+        <li key={lesson.id}>
+          <strong>{lesson.title}</strong><br/>
+          {lesson.content}<br/>
+          {lesson.video_url && <a href={lesson.video_url} target="_blank" rel="noopener noreferrer">Watch Video</a>}
+          {isEnrolled && (
+            <button onClick={() => markLessonComplete(lesson.id)}>
+              Mark as Completed
+            </button>
+          )}
+        </li>
+      ))}
 
       <h3>Quizzes</h3>
       {quizzes.length === 0 ? (
@@ -81,6 +178,71 @@ const CourseDetail = () => {
             </li>
           ))}
         </ul>
+      )}
+
+      <h3>Your Progress</h3>
+      {userProgress ? (
+        <div>
+          <p>Completed Lessons: {userProgress.completed_lessons.length}</p>
+          <p>Quiz Scores:</p>
+          {Object.entries(userProgress.quiz_scores).length === 0 ? (
+            <p>No quiz scores yet.</p>
+          ) : (
+            <ul>
+              {Object.entries(userProgress.quiz_scores).map(([quizId, score]) => (
+                <li key={quizId}>Quiz {quizId}: {score} points</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        isEnrolled ? <p>Loading progress...</p> : <p>Enroll to track progress.</p>
+      )}
+
+      <h3>Reviews</h3>
+      {reviews.length === 0 ? (
+        <p>No reviews yet.</p>
+      ) : (
+        <ul>
+          {reviews.map((review) => (
+            <li key={review.id}>
+              <strong>Rating:</strong> {review.rating} / 5<br/>
+              <em>{review.comment}</em><br/>
+              By User ID: {review.user}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {canReview && (
+        <div style={{ marginTop: '20px' }}>
+          <h4>Leave a Review</h4>
+          <form onSubmit={handleReviewSubmit}>
+            <label>
+              Rating (1-5): 
+              <input
+                type="number"
+                min="1"
+                max="5"
+                value={rating}
+                onChange={(e) => setRating(e.target.value)}
+              />
+            </label><br/>
+            <label>
+              Comment:<br/>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </label><br/>
+            <button type="submit">Submit Review</button>
+          </form>
+          {reviewMessage && <p>{reviewMessage}</p>}
+        </div>
+      )}
+
+      {!canReview && userInfo && (
+        <p>You must be enrolled and not the instructor to leave a review.</p>
       )}
     </div>
   );
