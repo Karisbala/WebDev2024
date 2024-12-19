@@ -5,6 +5,8 @@ const Dashboard = () => {
   const [courses, setCourses] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
   const [topUpAmount, setTopUpAmount] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const fetchUserInfo = async () => {
     try {
@@ -15,9 +17,22 @@ const Dashboard = () => {
     }
   };
 
-  const fetchCourses = async () => {
+  const fetchCategories = async () => {
     try {
-      const response = await API.get('courses/');
+      const response = await API.get('categories/');
+      setCategories(response.data);
+    } catch (err) {
+      console.error('Failed to fetch categories', err);
+    }
+  };
+
+  const fetchCourses = async (categoryId = '') => {
+    try {
+      let url = 'courses/';
+      if (categoryId) {
+        url += `?category=${categoryId}`;
+      }
+      const response = await API.get(url);
       setCourses(response.data);
     } catch (err) {
       console.error('Failed to fetch courses', err);
@@ -26,6 +41,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchUserInfo();
+    fetchCategories();
     fetchCourses();
   }, []);
 
@@ -40,19 +56,25 @@ const Dashboard = () => {
       fetchUserInfo();
     } catch (err) {
       console.error('Top-up error', err);
-      alert('Failed to top up. Ensure you are logged in and try again.');
+      alert('Failed to top up.');
     }
   };
 
   const handlePurchase = async (courseId) => {
     try {
-      const response = await API.post('enrollments/purchase/', { course_id: courseId });
+      await API.post('enrollments/purchase/', { course_id: courseId });
       alert(`Enrolled successfully in course ID ${courseId}!`);
       fetchUserInfo();
     } catch (err) {
       console.error('Purchase error', err);
-      alert('Failed to purchase course. Check your wallet balance or if you are already enrolled.');
+      alert('Failed to purchase course.');
     }
+  };
+
+  const handleCategoryChange = (e) => {
+    const categoryId = e.target.value;
+    setSelectedCategory(categoryId);
+    fetchCourses(categoryId);
   };
 
   return (
@@ -77,6 +99,14 @@ const Dashboard = () => {
           </form>
         </div>
       )}
+
+      <h3>Filter by Category</h3>
+      <select value={selectedCategory} onChange={handleCategoryChange}>
+        <option value="">All Categories</option>
+        {categories.map((cat) => (
+          <option key={cat.id} value={cat.id}>{cat.name}</option>
+        ))}
+      </select>
 
       <h3>Available Courses</h3>
       <ul>

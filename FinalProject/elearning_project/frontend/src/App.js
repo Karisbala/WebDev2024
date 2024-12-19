@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import MyCourses from './pages/MyCourses';
 import CourseDetail from './pages/CourseDetail';
+import QuizAttempt from './pages/QuizAttempt';
 
 const App = () => {
   const isAuthenticated = !!localStorage.getItem('access_token');
@@ -41,6 +42,7 @@ const App = () => {
           {isAuthenticated && <Route path="/dashboard" element={<Dashboard />} />}
           {isAuthenticated && <Route path="/my-courses" element={<MyCourses />} />}
           {isAuthenticated && <Route path="/courses/:id" element={<CourseDetail />} />}
+          {isAuthenticated && <Route path="/courses/:id/quizzes/:quiz_id" element={<QuizAttempt />} />}
         </Routes>
       </div>
     </Router>
